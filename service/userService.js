@@ -1,47 +1,49 @@
-const userModel = require("../models/userModel");
+const userRepository = require("../repository/userRepository");
 const {hash}= require("bcryptjs");
 const {v4: uuid}=require("uuid");
-const { models } = require("../models");
 module.exports={
     createUser: async (body)=>{
         try{
             body.userId=uuid();
             body.password= await hash(body.password, 10);
-            const isUser= await userModel.getUserByUserName(body.userName);
-            if (isUser.response || isUser.error){
+            const isUser= await userRepository.getUserByUserName(body.userName);
+            if (isUser.error){
                 return {
-                    error: "User wit this username already exits.",
+                    error: isUser.error,
                 };
             }
-            const createdUser = await userModel.createUser(body);
+            if (isUser.response){
+                return {
+                    error: "User with this username already exists.",
+                };
+            }
+            const createdUser = await userRepository.createUser(body);
             if(createdUser.error){
                 return{
                     error:createdUser.error,
                 }
-            }            
-            delete createdUser.response.dataValues.password;
+            }
+            const userPayload = createdUser.response.toJSON();
+            delete userPayload.password;
             return {
-                response:createdUser.response,
+                response:userPayload,
             }
 
         }
         catch(error){
             return{
-                error:{
-                    error:error.message,
-                    filename:"userService",
-                }
+                error:error.message,
             }
         }
     },
     getAllUser: async ()=>{
         try{
-            const users = await userModel.getAllUser();
+            const users = await userRepository.getAllUser();
             if(users.error){
                 return{
                     error:users.error,
                 }
-            }            
+            }
             return {
                 response:users.response,
             }
@@ -49,21 +51,18 @@ module.exports={
         }
         catch(error){
             return{
-                error:{
-                    error:error.message,
-                    filename:"userService",
-                }
+                error:error.message,
             }
         }
     },
     updateUser: async(body)=>{
         try{
-            const updatedUser= await userModel.updateUser(body);
+            const updatedUser= await userRepository.updateUser(body);
             if (updatedUser.error){
                 return{
-                    error: error.message,
+                    error: updatedUser.error,
                 }
-            } 
+            }
             return {
                 response: updatedUser.response,
             };
@@ -71,21 +70,18 @@ module.exports={
         }
         catch(error){
             return{
-                error:{
-                    error:error.message,
-                    filename:"userService",
-                },
+                error:error.message,
             }
         }
     },
-    deleteUser: async(query)=>{
+    deleteUser: async(userId)=>{
         try{
-            const deletedUser= await userModel.deleteUser(query.userId);
+            const deletedUser= await userRepository.deleteUser(userId);
             if (deletedUser.error){
                 return{
-                    error: error.message,
+                    error: deletedUser.error,
                 }
-            } 
+            }
             return {
                 response: deletedUser.response,
             };
@@ -93,10 +89,7 @@ module.exports={
         }
         catch(error){
             return{
-                error:{
-                    error:error.message,
-                    filename:"userService",
-                },
+                error:error.message,
             }
         }
     }

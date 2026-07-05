@@ -1,34 +1,40 @@
 const joi=require('joi')
-const {login}=require('../service/authService')
+const {login: authenticateUser}=require('../service/authService')
 const loginSchema=joi.object().keys({
     userName:joi.string().required(),
     password: joi.string().required().min(6),
-});// schemea to validate now we have to valid it 
+});
 
-let authController={
+const authController={
     login:async (req,res)=>{
         try {
-            const validate= await loginSchema.validateAsync(req.body);//to validate data 
-            const loginResponse=await login(validate)
-            if (loginResponse.error){
-                return res.send({
-                    error:loginResponse.error,
+            const validated= await loginSchema.validateAsync(req.body);
+            const loginResult=await authenticateUser(validated)
+            if (loginResult.error){
+                return res.status(401).send({
+                    error:loginResult.error,
                 })
-            } 
-            res.cookie("Session", loginResponse.response,{maxAge : 20000});
-            return res.send({
-                response: loginResponse.response,
+            }
+            res.cookie("Session", loginResult.response,{maxAge : 20000, httpOnly: true});
+            return res.status(200).send({
+                response: loginResult.response,
             })
-    }catch(error){
-            return res.send({
-                message:'login api',
+        }catch(error){
+            if(error.isJoi){
+                return res.status(400).send({
+                    error:error.message,
+                });
+            }
+            return res.status(500).send({
                 error:error.message,
             });
-
         }
         },
     logout:(req,res)=>{
-        return res.send('My logout page')
+        res.clearCookie("Session");
+        return res.status(200).send({
+            response:"Logged out successfully",
+        });
         },
 };
 module.exports=authController

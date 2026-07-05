@@ -1,23 +1,23 @@
 const { Model, DataTypes} = require("sequelize");
 const sequelize = require("../../bin/dbConnection");
 
-class ADDRESS extends Model {}
+class Role extends Model {}
 
-ADDRESS.init({
-    addressId:{
+Role.init({
+    roleId:{
         primaryKey:true,
         type:DataTypes.STRING(),
     },
-    address:{
+    roleName:{
         type :DataTypes.STRING(),
-        allowNull:false,
+        unique:true,
+        allowNull: false,
     },
 },
 {
     timestamps:true,
     paranoid:true,
-    // name:"user",
     sequelize,
 }
 );
-module.exports = ADDRESS;
+module.exports = Role;

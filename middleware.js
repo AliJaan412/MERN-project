@@ -6,26 +6,26 @@ module.exports={
         try {
             const token = req.cookies.Session;
             if(!token){
-                return res.send({
+                return res.status(401).json({
                     error: "Un-authorised user",
                 })
-            } 
+            }
             verify(token, process.env.SECRET,(error,data)=>{
                 if(error){
-                    return res.send({
+                    return res.status(403).json({
                         error: "Forbidden access",
                     });
                 }
-                console.log("data",data.response);
+                req.user = data;
                 next();
             });
         } catch (error) {
-            return res.send(
+            return res.status(500).json(
                 {
                     error: error.message,
                 }
             )
-            
+
         }
     }
 }

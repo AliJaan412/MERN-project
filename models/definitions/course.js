@@ -1,10 +1,9 @@
 const { Model, DataTypes} = require("sequelize");
 const sequelize = require("../../bin/dbConnection");
 
+class Course extends Model{}
 
-class COURSES extends Model{}
-
-COURSES.init({
+Course.init({
     courseId:{
         primaryKey:true,
         type:DataTypes.STRING(),
@@ -18,8 +17,7 @@ COURSES.init({
 {
     timestamps:true,
     paranoid:true,
-    // name:"course",
     sequelize,
 }
 )
-module.exports=COURSES;
+module.exports=Course;

@@ -1,18 +1,22 @@
 const { Model, DataTypes} = require("sequelize");
 const sequelize = require("../../bin/dbConnection");
 
-class ROLES extends Model {}
+class User extends Model {}
 
-ROLES.init({
-    roleId:{
+User.init({
+    userId:{
         primaryKey:true,
         type:DataTypes.STRING(),
     },
-    roleName:{
+    userName:{
         type :DataTypes.STRING(),
         unique:true,
-        allowNull: false,
+        allowNull:false,
     },
+    password:{
+        type:DataTypes.STRING(),
+        allowNull:false,
+    }
 },
 {
     timestamps:true,
@@ -20,4 +24,4 @@ ROLES.init({
     sequelize,
 }
 );
-module.exports = ROLES;
+module.exports = User;

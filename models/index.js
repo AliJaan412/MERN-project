@@ -1,30 +1,28 @@
 const sequelize = require("../bin/dbConnection");
-const USERS = require("./definations/user");
-const ADDRESS=require("./definations/address");
-const ROLES= require("./definations/roles")
-const COURSES = require("./definations/course");
-const UserCourse = require("./definations/userCourse");
-// //Relation 
-// // 1-to-1
-// ADDRESS.hasOne(USERS,{foreignKey:"addressId"});
-// USERS.belongsTo(ADDRESS,{foreignKey:"addressId"});
-// //1-to-many
-// ROLES.hasMany(USERS,{foreignKey:"roleId"});
-// USERS.belongsTo(ROLES,{foreignKey:"roleId"});
-// // many-to-many
-// // user-usercourse
-// USERS.hasMany(UserCourse,{foreignKey:"userId"});
-// UserCourse.belongsTo(USERS,{foreignKey:"userId"});
-// //course-usercourse 
-// COURSES.hasMany(UserCourse,{foreignKey:"courseId"});
-// UserCourse.belongsTo(COURSES,{foreignKey:"courseId"});
+const User = require("./definitions/user");
+const Address = require("./definitions/address");
+const Role = require("./definitions/role");
+const Course = require("./definitions/course");
+const UserCourse = require("./definitions/userCourse");
+
+// 1-to-1
+Address.hasOne(User, {foreignKey:"addressId"});
+User.belongsTo(Address, {foreignKey:"addressId"});
+// 1-to-many
+Role.hasMany(User, {foreignKey:"roleId"});
+User.belongsTo(Role, {foreignKey:"roleId"});
+// many-to-many: user-course
+User.hasMany(UserCourse, {foreignKey:"userId"});
+UserCourse.belongsTo(User, {foreignKey:"userId"});
+Course.hasMany(UserCourse, {foreignKey:"courseId"});
+UserCourse.belongsTo(Course, {foreignKey:"courseId"});
 
 const models = {
-    users:USERS,
-    // address: ADDRESS,
-    // roles: ROLES,
-    // course:COURSES,
-    // userCourse: UserCourse,
+    user: User,
+    address: Address,
+    role: Role,
+    course: Course,
+    userCourse: UserCourse,
 };
 const db={};
 db.sequelize = sequelize;

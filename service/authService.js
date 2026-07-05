@@ -1,11 +1,11 @@
 const { compare }=require('bcryptjs');
-const userModel= require("../models/userModel");
+const userRepository= require("../repository/userRepository");
 const {sign}= require("jsonwebtoken");
 require("dotenv").config();
 module.exports={
     login: async (validate)=>{
-try { 
-    const isUser = await userModel.getUserByUserName(validate.userName);
+try {
+    const isUser = await userRepository.getUserByUserName(validate.userName);
     if(isUser.error || isUser.response==null){
         return {
             error: "Invalid credentials",
@@ -17,8 +17,9 @@ try {
             error: "Invalid credentials",
         }
     }
-    delete isUser.response.dataValues.password;
-    const token= sign(isUser.response.dataValues, process.env.SECRET, {expiresIn: "1h"});
+    const userPayload = isUser.response.toJSON();
+    delete userPayload.password;
+    const token= sign(userPayload, process.env.SECRET, {expiresIn: "1h"});
     return {
         response: token,
     }

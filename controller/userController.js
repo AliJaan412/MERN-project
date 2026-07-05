@@ -4,36 +4,33 @@ const joi = require("joi");
 const createUserSchema = joi.object().keys({
     userName: joi.string().required().min(3).max(34),
     password: joi.string().required().min(3).max(24),
-    // confrimPassword:joi.ref("password"),
 })
 const updateUserSchema = joi.object().keys({
     userName: joi.string().required().min(3).max(34),
-    userId: joi.string().required(),
 });
-const deleteUserSchema = joi.object().keys({
-    userId: joi.string().required(),
-})
+
 module.exports = {
     createUser : async (req, res)=>{
         try{
-
-            const validate = await createUserSchema.validateAsync(req.body);
-            const createdUser  = await userService.createUser(validate);
+            const validated = await createUserSchema.validateAsync(req.body);
+            const createdUser  = await userService.createUser(validated);
             if(createdUser.error){
-                return res.send({
+                return res.status(400).send({
                     error:createdUser.error,
                 });
             }
-            return res.send({
+            return res.status(201).send({
                 response: createdUser.response,
             });
         }
         catch(error){
-            return res.send({
-                error:{
+            if(error.isJoi){
+                return res.status(400).send({
                     error:error.message,
-                    filename:"userController",
-                }
+                });
+            }
+            return res.status(500).send({
+                error:error.message,
             });
         }
     },
@@ -41,64 +38,59 @@ module.exports = {
         try{
             const users= await userService.getAllUser();
             if(users.error){
-                return res.send({
+                return res.status(400).send({
                     error:users.error,
                 });
             }
-            return res.send({
+            return res.status(200).send({
                 response: users.response,
             });
         }
         catch(error){
-            return res.send({
-                error:{
-                    error:error.message,
-                    filename:"userController",
-                }
+            return res.status(500).send({
+                error:error.message,
             });
         }
     },
     updateUser : async (req, res)=>{
         try{
-          const validateUpdateUser = await updateUserSchema.validateAsync(req.body);
-          const updatedUser= await userService.updateUser(validateUpdateUser);
+          const validated = await updateUserSchema.validateAsync(req.body);
+          const updatedUser= await userService.updateUser({...validated, userId: req.user.userId});
           if(updatedUser.error){
-            return res.send({
+            return res.status(400).send({
                 error:updatedUser.error,
             });
-        }
-        return res.send({
-            response: updatedUser.response,
-        });
+          }
+          return res.status(200).send({
+              response: updatedUser.response,
+          });
         }
         catch(error){
-            return res.send({
-                error:{
+            if(error.isJoi){
+                return res.status(400).send({
                     error:error.message,
-                    filename:"userController",
-                }
+                });
+            }
+            return res.status(500).send({
+                error:error.message,
             });
         }
     },
     deleteUser : async (req, res)=>{
         try{
-          const deleteUpdateUser = await deleteUserSchema.validateAsync(req.query);
-          const deletedUser= await userService.deleteUser(deleteUpdateUser);
+          const deletedUser= await userService.deleteUser(req.user.userId);
           if(deletedUser.error){
-            return res.send({
+            return res.status(400).send({
                 error:deletedUser.error,
             });
-        }
-        return res.send({
-            response: deletedUser.response,
-        });
+          }
+          return res.status(200).send({
+              response: deletedUser.response,
+          });
         }
         catch(error){
-            return res.send({
-                error:{
-                    error:error.message,
-                    filename:"userController",
-                }
+            return res.status(500).send({
+                error:error.message,
             });
         }
     }
